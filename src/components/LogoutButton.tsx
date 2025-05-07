@@ -37,6 +37,10 @@ const Logoutbutton = styled.img`
   right: 3vh;
   width: 50px;
   cursor: pointer;
+
+  @media (max-width: 767px) {
+    right: 0vh;
+  }
 `;
 
 export default LogoutButton;

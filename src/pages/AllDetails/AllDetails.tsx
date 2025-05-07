@@ -1,10 +1,9 @@
 import { FC, useEffect, useState } from "react";
-import { Grid, Col, Select } from "@mantine/core";
+import { Grid, Col, Select, TextInput } from "@mantine/core";
 import DataBox from "../../components/DataBox";
 import DragonBox from "../../components/DragonBox";
 import { fetchData } from "../../api/FetchData";
-import styled from "styled-components";
-import LogoutButton from "../../components/LogoutButton";
+import { useLocation } from "react-router-dom";
 
 interface Launches {
   name: string;
@@ -30,11 +29,17 @@ interface Dragons {
 }
 
 const Alldetails: FC = () => {
+  const { state } = useLocation();
+  const { category } = state;
+
   const [data, setData] = useState<(Launches | Dragons)[]>([]);
   const [filteredData, setFilteredData] = useState<(Launches | Dragons)[]>([]);
-  const [selectedLaunch, setSelectedLaunches] = useState("launches");
+  const [selectedLaunch, setSelectedLaunches] = useState(
+    category === "dragons" ? "dragons" : "launches"
+  );
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,8 +78,14 @@ const Alldetails: FC = () => {
       }
     }
 
+    if (searchTerm.trim()) {
+      updatedData = updatedData.filter((item: any) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
     setFilteredData(updatedData);
-  }, [sortOrder, selectedLaunch, statusFilter, data]);
+  }, [sortOrder, selectedLaunch, statusFilter, searchTerm, data]);
 
   const handleSortChange = (val: string | null) => {
     if (val) setSortOrder(val);
@@ -84,6 +95,7 @@ const Alldetails: FC = () => {
     if (val) {
       setSelectedLaunches(val);
       setStatusFilter("all");
+      setSearchTerm(""); // reset search
     }
   };
 
@@ -91,16 +103,29 @@ const Alldetails: FC = () => {
     if (val) setStatusFilter(val);
   };
 
+  const handleSearchChange = (val: string) => {
+    setSearchTerm(val);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <>
-      <div className="d-flex flex-column align-items-center">
-        <h1>
-          {selectedLaunch.charAt(0).toUpperCase() + selectedLaunch.slice(1)}
-        </h1>
+    <div className="d-flex flex-column align-items-center">
+      <h1>
+        {selectedLaunch.charAt(0).toUpperCase() + selectedLaunch.slice(1)}
+      </h1>
 
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          maxWidth: "100vw",  
+        }}
+      >
         <Select
           value={selectedLaunch}
           onChange={handleFilterChange}
@@ -108,8 +133,8 @@ const Alldetails: FC = () => {
             { value: "launches", label: "Launches" },
             { value: "dragons", label: "Dragons" },
           ]}
-          style={{ marginBottom: "20px", width: "200px" }}
           placeholder="Select Category"
+          style={{ width: "200px", maxWidth: "100vw" }}
         />
 
         {selectedLaunch === "launches" ? (
@@ -120,8 +145,8 @@ const Alldetails: FC = () => {
               { value: "asc", label: "Ascending" },
               { value: "desc", label: "Descending" },
             ]}
-            style={{ marginBottom: "20px", width: "200px" }}
             placeholder="Sort by Date"
+            style={{ width: "200px", maxWidth: "100vw" }}
           />
         ) : (
           <Select
@@ -132,45 +157,52 @@ const Alldetails: FC = () => {
               { value: "active", label: "Active" },
               { value: "inactive", label: "Inactive" },
             ]}
-            style={{ marginBottom: "20px", width: "200px" }}
             placeholder="Filter by Status"
+            style={{ width: "200px", maxWidth: "100vw" }}
           />
         )}
 
-        <Grid gutter="md" style={{ width: "80%" }}>
-          {filteredData.map((element: any, index: number) => (
-            <Col key={index} xs={6} sm={6} md={4} lg={3}>
-              {selectedLaunch === "launches" ? (
-                <DataBox
-                  name={element.name}
-                  date={element.date}
-                  id={element.id}
-                  img={element.img}
-                  details={element.details}
-                  success={element.success}
-                  youtubeLink={element.youtubeLink}
-                  wikipedia={element.wikipedia}
-                  article={element.article}
-                  presskit={element.presskit}
-                  selectedLaunch={selectedLaunch}
-                />
-              ) : (
-                <DragonBox
-                  name={element.name}
-                  id={element.id}
-                  type={element.type}
-                  img={element.img || element.flickr_images?.[0]}
-                  active={element.active}
-                  details={element.details || element.description}
-                  wikipedia={element.wikipedia}
-                  selectedLaunch={selectedLaunch}
-                />
-              )}
-            </Col>
-          ))}
-        </Grid>
+        <TextInput
+          value={searchTerm}
+          onChange={(event) => handleSearchChange(event.currentTarget.value)}
+          placeholder="Search by Name"
+          style={{ width: "200px", maxWidth: "100vw" }}
+        />
       </div>
-    </>
+
+      <Grid gutter="md" style={{ width: "80%", maxWidth: "100vw" }}>
+        {filteredData.map((element: any, index: number) => (
+          <Col key={index} xs={6} sm={6} md={4} lg={3}>
+            {selectedLaunch === "launches" ? (
+              <DataBox
+                name={element.name}
+                date={element.date}
+                id={element.id}
+                img={element.img}
+                details={element.details}
+                success={element.success}
+                youtubeLink={element.youtubeLink}
+                wikipedia={element.wikipedia}
+                article={element.article}
+                presskit={element.presskit}
+                selectedLaunch={selectedLaunch}
+              />
+            ) : (
+              <DragonBox
+                name={element.name}
+                id={element.id}
+                type={element.type}
+                img={element.img || element.flickr_images?.[0]}
+                active={element.active}
+                details={element.details || element.description}
+                wikipedia={element.wikipedia}
+                selectedLaunch={selectedLaunch}
+              />
+            )}
+          </Col>
+        ))}
+      </Grid>
+    </div>
   );
 };
 

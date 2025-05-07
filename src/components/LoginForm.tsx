@@ -37,7 +37,7 @@ const LoginForm = () => {
           title: 'Account created!',
           message: 'Redirect to all details page.',
         });
-        navigate('/alldetails');
+        navigate('/dashboard');
         setIsSignup(false);
       }
     } else {
@@ -63,7 +63,7 @@ const LoginForm = () => {
           title: 'Credentials Matched!',
           message: 'Redirecting to all details page.',
         });
-        navigate('/alldetails');
+        navigate('/dashboard');
       }
     }
   };
