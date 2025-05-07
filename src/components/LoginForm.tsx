@@ -27,6 +27,11 @@ const LoginForm = () => {
     if (isSignup) {
       if (users[email]) {
         setMessage({ text: "Account already exists. Please log in.", type: "error" });
+        notifications.show({
+          color: 'red',
+          title: 'Existing Account',
+          message: message.text,
+        });
       } else {
         users[email] = password;
         localStorage.setItem("users", JSON.stringify(users));
