@@ -53,7 +53,7 @@ const DragonBox: FC<Dragons> = ({
         <Image
           src={img}
           height={180}
-          fit="contain"
+          fit="cover"
           alt={name}
           withPlaceholder
         />

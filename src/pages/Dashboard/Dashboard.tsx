@@ -14,6 +14,10 @@ const GradientTitle = styled(Title)`
   -webkit-text-fill-color: transparent;
   font-weight: 800;
   margin-bottom: 2rem;
+
+  @media (max-width: 476px) {
+    font-weight: 400;
+  }
 `;
 
 const PaperWrapper = styled.div`
